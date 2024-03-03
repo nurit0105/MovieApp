@@ -3,6 +3,9 @@ package com.example.movieappmad24
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.models.getMovies
@@ -78,16 +80,17 @@ fun MovieList(modifier: Modifier, movies: List<Movie> = getMovies()) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieRow(movie: Movie) {
-    var showDetails by remember {
+    var expandedState by remember {
         mutableStateOf(false)
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp),
+            .padding(10.dp),
         shape = ShapeDefaults.Large,
         elevation = CardDefaults.cardElevation(10.dp)
     ) {
@@ -128,26 +131,61 @@ fun MovieRow(movie: Movie) {
                 Icon(
                     modifier = Modifier
                         .clickable {
-                            showDetails = !showDetails
+                            expandedState = !expandedState
                         },
                     imageVector =
-                    if (showDetails) Icons.Filled.KeyboardArrowDown
+                    if (expandedState) Icons.Filled.KeyboardArrowDown
                     else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
                 )
             }
+            if (expandedState) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize(
+                            animationSpec = tween(
+                                delayMillis = 300,
+                                easing = LinearOutSlowInEasing
+                            )
+                        ),
+                    onClick = {
+                        expandedState = !expandedState
+                    }
+                ) {
+                    Row {
+                        Column {
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp, top = 10.dp),
+                                text = "Director: ${movie.director}"
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp),
+                                text = "Released: ${movie.year}"
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp),
+                                text = "Genre: ${movie.genre}"
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp),
+                                text = "Actors ${movie.actors}"
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp),
+                                text = "Rating ${movie.rating}"
+                            )
+                            Text(
+                                modifier = Modifier.padding(start = 10.dp, bottom = 10.dp),
+                                text = "Plot: ${movie.plot}"
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
-}
 
-/*
-@Preview
-@Composable
-fun DefaultPreview(){
-    MovieAppMAD24Theme {
-       MovieList(movies = getMovies())
-    }
 }
-*/
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,8 +194,10 @@ fun UserInterface() {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                modifier = Modifier.fillMaxWidth().padding(start = 125.dp),
-                title = { Text(text = "Movie App")}
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 125.dp),
+                title = { Text(text = "Movie App") }
             )
         },
         bottomBar = {
@@ -202,6 +242,9 @@ fun UserInterface() {
         MovieList(modifier = Modifier.padding(innerPadding), movies = getMovies())
     }
 }
+
+
+
 
 
 
