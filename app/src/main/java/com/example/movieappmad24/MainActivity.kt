@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.models.getMovies
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
@@ -101,10 +103,19 @@ fun MovieRow(movie: Movie) {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
+                /* Image(
                     painter = painterResource(id = R.drawable.movie_image),
                     contentScale = ContentScale.Crop,
                     contentDescription = "placeholder image"
+                )*/
+
+                AsyncImage(
+                    /* model = movie.images, */
+                    model = movie.images.firstOrNull() ?: "",
+                    contentDescription = "Image of Movie",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
                 Box(
                     modifier = Modifier
