@@ -1,4 +1,4 @@
-package com.example.movieappmad24
+package com.example.movieappmad24.models
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -16,21 +16,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,89 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.movieappmad24.models.Movie
-import com.example.movieappmad24.models.getMovies
-
-@Composable
-fun HomeScreen() {
-    UserInterface(
-        "Movie App",
-        "Home",
-        iconLeft = { Icon(Icons.Default.Home, contentDescription = "Home") },
-        "Watchlist",
-        iconRight = { Icon(Icons.Default.Star, contentDescription = "Watchlist") })
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun UserInterface(
-    title: String,
-    textIconLeft: String,
-    iconLeft: @Composable () -> Unit = { Icon(Icons.Default.Home, contentDescription = "Home") },
-    textIconRight: String,
-    iconRight: @Composable () -> Unit = {
-        Icon(
-            Icons.Default.Star,
-            contentDescription = "Watchlist"
-        )
-    }
-) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 125.dp),
-                title = { Text(text = title) }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(
-                actions = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(start = 20.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            IconButton(
-                                onClick = { /* do something */ }
-                            ) {
-                                iconLeft()
-                            }
-                            Text(text = textIconLeft)
-                        }
-                        Column(
-                            modifier = Modifier.padding(end = 20.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            IconButton(onClick = { /* do something */ }) {
-                                iconRight()
-                            }
-                            Text(text = textIconRight)
-                        }
-                    }
-                }
-            )
-        },
-    ) { innerPadding ->
-        ListOfVisibleObjectGroups(
-            modifier = Modifier.padding(innerPadding),
-            items = getMovies()
-        ) { movie ->
-            SingleMovieObjectGroup(item = movie)
-        }
-    }
-}
-
 
 @Composable
 fun <T> ListOfVisibleObjectGroups(
@@ -133,7 +44,7 @@ fun <T> ListOfVisibleObjectGroups(
 ) {
     LazyColumn(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp) // Adjust the spacing as needed
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         items(items) { item ->
             itemContent(item)
@@ -150,12 +61,14 @@ fun <T> SingleVisibleObjectGroup(
     labels: List<(T) -> String>,
     contentDescription: List<(T) -> String>,
     getImages: (T) -> List<String>,
+    onClick: (String) -> Unit
 ) {
     var expandedState by remember {
         mutableStateOf(false)
     }
 
     Card(
+        onClick = { onClick(id(item)) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
@@ -238,36 +151,34 @@ fun <T> SingleVisibleObjectGroup(
     }
 }
 
+
 @Composable
 fun SingleMovieObjectGroup(
+    modifier: Modifier = Modifier,
     item: Movie,
-    id: (Movie) -> String = {it.id},
-    title: (Movie) -> String = { it.title },
-    labels: List<(Movie) -> String> = listOf(
-        { movie -> "Director" },
-        { movie -> "Released" },
-        { movie -> "Genre" },
-        { movie -> "Actors" },
-        { movie -> "Rating" },
-        { movie -> "Plot" }
-
-    ),
-    contentDescription: List<(Movie) -> String> = listOf(
-        { it.director },
-        { it.year },
-        { it.genre },
-        { it.actors },
-        { it.rating },
-        { it.plot }
-    ),
-    getImages: (Movie) -> List<String> = { it.images }
+    onClick: (String) -> Unit
 ) {
     SingleVisibleObjectGroup(
         item = item,
-        id = id,
-        title = title,
-        labels = labels,
-        contentDescription = contentDescription,
-        getImages = getImages
+        id = { it.id },
+        title = { it.title },
+        labels = listOf(
+            { movie -> "Director" },
+            { movie -> "Released" },
+            { movie -> "Genre" },
+            { movie -> "Actors" },
+            { movie -> "Rating" },
+            { movie -> "Plot" }
+        ),
+        contentDescription = listOf(
+            { it.director },
+            { it.year },
+            { it.genre },
+            { it.actors },
+            { it.rating },
+            { it.plot }
+        ),
+        getImages = { it.images },
+        onClick = { movieId -> onClick(movieId) }
     )
 }
