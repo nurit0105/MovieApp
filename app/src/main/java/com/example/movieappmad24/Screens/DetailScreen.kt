@@ -2,8 +2,6 @@ package com.example.movieappmad24.Screens
 
 import android.util.Log
 import com.example.movieappmad24.models.SingleMovieObjectGroup
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
