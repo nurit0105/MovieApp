@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(navController)
+                    AppNavigation(navController) // Note to myself: Rendering of the Different Screens work through the AppNavigation
                 }
             }
         }
