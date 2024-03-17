@@ -9,8 +9,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.Bottoms
-import com.example.movieappmad24.models.Tops
+import com.example.movieappmad24.models.SimpleBottomAppBar
+import com.example.movieappmad24.models.SimpleTopAppBar
 import com.example.movieappmad24.models.getMovies
 
 @Composable
@@ -18,18 +18,18 @@ fun HomeScreen(navController: NavController) {
     UserInterface(navController)
 }
 
-
 @Composable
 fun UserInterface(
     navController: NavController
 ) {
+    Log.d("MovieApp", "Navigated to HomeScreen")
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Tops(title = "Movie App")
+            SimpleTopAppBar(title = "Movie App")
         },
         bottomBar = {
-            Bottoms(navController)
+            SimpleBottomAppBar(navController)
         },
     ) { innerPadding ->
         ListOfVisibleObjectGroups(
@@ -47,7 +47,3 @@ fun UserInterface(
         }
     }
 }
-
-
-
-

@@ -1,5 +1,6 @@
 package com.example.movieappmad24.Screens
 
+import android.util.Log
 import com.example.movieappmad24.models.ListOfVisibleObjectGroups
 import com.example.movieappmad24.models.SingleMovieObjectGroup
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,22 +9,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.Bottoms
-import com.example.movieappmad24.models.Tops
+import com.example.movieappmad24.models.SimpleBottomAppBar
+import com.example.movieappmad24.models.SimpleTopAppBar
 import com.example.movieappmad24.models.getMovies
-
 
 @Composable
 fun WatchListScreen(
     navController: NavController
 ) {
+    Log.d("MovieApp", "Navigated to WatchListScreen")
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Tops(title = "Your Watch List")
+            SimpleTopAppBar(title = "Your Watch List")
         },
         bottomBar = {
-            Bottoms(navController = navController)
+            SimpleBottomAppBar(navController = navController)
         },
     ) { innerPadding ->
         ListOfVisibleObjectGroups(

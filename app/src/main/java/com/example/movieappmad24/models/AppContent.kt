@@ -151,7 +151,6 @@ fun <T> SingleVisibleObjectGroup(
     }
 }
 
-
 @Composable
 fun SingleMovieObjectGroup(
     modifier: Modifier = Modifier,
