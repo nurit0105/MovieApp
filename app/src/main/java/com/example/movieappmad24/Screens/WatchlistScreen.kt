@@ -1,20 +1,20 @@
 package com.example.movieappmad24.Screens
 
 import android.util.Log
-import com.example.movieappmad24.models.ListOfVisibleObjectGroups
-import com.example.movieappmad24.models.SingleMovieObjectGroup
+import com.example.movieappmad24.widgets.ListOfVisibleObjectGroups
+import com.example.movieappmad24.widgets.SingleMovieObjectGroup
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.SimpleBottomAppBar
-import com.example.movieappmad24.models.SimpleTopAppBar
+import com.example.movieappmad24.widgets.SimpleBottomAppBar
+import com.example.movieappmad24.widgets.SimpleTopAppBar
 import com.example.movieappmad24.models.getMovies
 
 @Composable
-fun WatchListScreen(
+fun WatchListScreen( // TODO add ViewModel
     navController: NavController
 ) {
     Log.d("MovieApp", "Navigated to WatchListScreen")

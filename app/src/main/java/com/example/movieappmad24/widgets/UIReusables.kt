@@ -1,4 +1,4 @@
-package com.example.movieappmad24.models
+package com.example.movieappmad24.widgets
 
 
 import androidx.compose.foundation.Image

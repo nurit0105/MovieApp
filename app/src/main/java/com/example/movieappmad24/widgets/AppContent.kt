@@ -1,4 +1,4 @@
-package com.example.movieappmad24.models
+package com.example.movieappmad24.widgets
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.movieappmad24.models.Movie
 
 @Composable
 fun <T> ListOfVisibleObjectGroups(
@@ -98,6 +99,7 @@ fun <T> SingleVisibleObjectGroup(
                     Icon(
                         tint = MaterialTheme.colorScheme.secondary,
                         imageVector = Icons.Default.FavoriteBorder,
+                        //TODO toggleFavoriteMovie aus ViewModel hier referenzieren "bubble up/down"
                         contentDescription = "Add to favorites"
                     )
                 }

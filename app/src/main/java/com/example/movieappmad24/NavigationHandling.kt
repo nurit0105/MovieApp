@@ -36,3 +36,5 @@ fun AppNavigation(navController: NavHostController) {
         }
     }
 }
+
+//TODO hier in Navigation initialisieren

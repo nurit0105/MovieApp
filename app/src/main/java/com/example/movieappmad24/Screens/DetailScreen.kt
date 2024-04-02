@@ -1,7 +1,7 @@
 package com.example.movieappmad24.Screens
 
 import android.util.Log
-import com.example.movieappmad24.models.SingleMovieObjectGroup
+import com.example.movieappmad24.widgets.SingleMovieObjectGroup
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -16,13 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.SimpleBottomAppBar
-import com.example.movieappmad24.models.CoilImage
-import com.example.movieappmad24.models.SimpleTopAppBar
+import com.example.movieappmad24.widgets.SimpleBottomAppBar
+import com.example.movieappmad24.widgets.CoilImage
+import com.example.movieappmad24.widgets.SimpleTopAppBar
 import com.example.movieappmad24.models.getMovies
 
 @Composable
-fun DetailScreen(
+fun DetailScreen( //TODO add ViewModel
     movieId: String,
     navController: NavController
 ) {
