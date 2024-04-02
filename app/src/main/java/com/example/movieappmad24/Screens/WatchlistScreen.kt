@@ -31,7 +31,14 @@ fun WatchListScreen(
             modifier = Modifier.padding(innerPadding),
             items = getMovies()
         ) { movie ->
-            SingleMovieObjectGroup(item = movie, onClick = { /* do nothing */})
+            SingleMovieObjectGroup(item = movie, onClick = { movieId ->
+                Log.d("MovieApp", "Clicked on movie with ID: $movieId")
+                try {
+                    navController.navigate("detail/$movieId")
+                } catch (e: Exception) {
+                    Log.e("MovieApp", "Error navigating to detail screen: ${e.message}")
+                }
+            })
         }
     }
 }
