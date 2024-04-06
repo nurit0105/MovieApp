@@ -21,15 +21,14 @@ import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.CoilImage
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 import com.example.movieappmad24.models.getMovies
- @Composable
+
+@Composable
 fun DetailScreen(
     movieId: String,
     navController: NavController,
     moviesViewModel: MoviesViewModel
 ) {
-    val movies = getMovies()
-    val currentMovie = movies.find { it.id == movieId }
-
+    val currentMovie = moviesViewModel.movies.find { it.id == movieId }
 
     Log.d("MovieApp", "Navigated to DetailScreen")
     Scaffold(
@@ -48,7 +47,11 @@ fun DetailScreen(
                 LazyColumn(modifier = Modifier.padding(innerPadding)) {
                     item {
                         Spacer(modifier = Modifier.height(8.dp))
-                        SingleVisibleObjectGroup(modifier = Modifier.padding(innerPadding), movie = movie)
+                        SingleVisibleObjectGroup(
+                            modifier = Modifier.padding(innerPadding),
+                            movie = movie,
+                            onFavoriteClick = { moviesViewModel.toggleFavoriteMovie(movie.id) }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                         CoilImage(getImages = { movie.images }, item = movie)
                         Spacer(modifier = Modifier.height(8.dp))
@@ -58,3 +61,4 @@ fun DetailScreen(
         }
     )
 }
+

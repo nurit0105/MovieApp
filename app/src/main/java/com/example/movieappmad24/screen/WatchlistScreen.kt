@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.movieappmad24.models.MoviesViewModel
-import com.example.movieappmad24.models.getMovies
 import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.SimpleTopAppBar
+
 @Composable
 fun WatchlistScreen(
     navController: NavController,
@@ -28,7 +28,7 @@ fun WatchlistScreen(
 
         ListOfVisibleObjectGroups(
             modifier = Modifier.padding(innerPadding),
-            movies = getMovies(),
+            movies = moviesViewModel.favoriteMovies,
             navController = navController,
             viewModel = moviesViewModel
         )
