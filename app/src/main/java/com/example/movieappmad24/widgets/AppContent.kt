@@ -1,8 +1,6 @@
-package com.example.movieappmad24.widgets
-
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,15 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
@@ -32,154 +34,174 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import com.example.movieappmad24.NavigationHandling
 import com.example.movieappmad24.models.Movie
+import com.example.movieappmad24.models.MoviesViewModel
+import com.example.movieappmad24.models.getMovies
 
 @Composable
-fun <T> ListOfVisibleObjectGroups(
+fun ListOfVisibleObjectGroups(
     modifier: Modifier,
-    items: List<T>,
-    itemContent: @Composable (item: T) -> Unit
-) {
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        items(items) { item ->
-            itemContent(item)
+    movies: List<Movie> = getMovies(),
+    navController: NavController,
+    viewModel: MoviesViewModel
+){
+    LazyColumn(modifier = modifier) {
+        items(viewModel.movies) { movie ->
+            SingleVisibleObjectGroup(
+                movie = movie,
+                onFavoriteClick = {movieId ->
+                    viewModel.toggleFavoriteMovie(movieId)
+                },
+                onItemClick = { movieId ->
+                    navController.navigate("detail/${movieId}")
+                }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T> SingleVisibleObjectGroup(
-    item: T,
-    id: (T) -> String,
-    title: (T) -> String,
-    labels: List<(T) -> String>,
-    contentDescription: List<(T) -> String>,
-    getImages: (T) -> List<String>,
-    onClick: (String) -> Unit
-) {
-    var expandedState by remember {
-        mutableStateOf(false)
-    }
-
-    Card(
-        onClick = { onClick(id(item)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
+fun SingleVisibleObjectGroup(
+    modifier: Modifier = Modifier,
+    movie: Movie,
+    onFavoriteClick: (String) -> Unit = {},
+    onItemClick: (String) -> Unit = {}
+){
+    Card(modifier = modifier
+        .fillMaxWidth()
+        .padding(5.dp)
+        .clickable {
+            onItemClick(movie.id)
+        },
         shape = ShapeDefaults.Large,
         elevation = CardDefaults.cardElevation(10.dp)
     ) {
         Column {
-            Box(
-                modifier = Modifier
-                    .height(150.dp)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                AsyncImage(
-                    model = getImages(item).first(),
-                    contentDescription = "Image of Item",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
-                    contentAlignment = Alignment.TopEnd
-                ) {
-                    Icon(
-                        tint = MaterialTheme.colorScheme.secondary,
-                        imageVector = Icons.Default.FavoriteBorder,
-                        //TODO toggleFavoriteMovie aus ViewModel hier referenzieren "bubble up/down"
-                        contentDescription = "Add to favorites"
-                    )
-                }
-            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = title(item))
-                Icon(
-                    modifier = Modifier
-                        .clickable {
-                            expandedState = !expandedState
-                        },
-                    imageVector =
-                    if (expandedState) Icons.Filled.KeyboardArrowDown
-                    else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
-                )
-            }
-            if (expandedState) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .animateContentSize(
-                            animationSpec = tween(
-                                delayMillis = 300,
-                                easing = LinearOutSlowInEasing
-                            )
-                        ),
-                    onClick = {
-                        expandedState = !expandedState
-                    }
-                ) {
-                    Row {
-                        Column {
-                            for (i in 0 until minOf(labels.size, contentDescription.size)) {
-                                Text(
-                                    modifier = Modifier.padding(start = 10.dp),
-                                    text = "${labels[i](item)}: ${contentDescription[i](item)}"
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            MovieCardHeader(
+                imageUrl = movie.images[0],
+                isFavorite = movie.isFavorite,
+                onFavoriteClick = { onFavoriteClick(movie.id) }
+            )
+
+            MovieDetails(modifier = modifier.padding(12.dp), movie = movie)
+
         }
     }
 }
 
 @Composable
-fun SingleMovieObjectGroup(
-    modifier: Modifier = Modifier,
-    item: Movie,
-    onClick: (String) -> Unit
+fun MovieCardHeader(
+    imageUrl: String,
+    isFavorite: Boolean = false,
+    onFavoriteClick: () -> Unit = {}
 ) {
-    SingleVisibleObjectGroup(
-        item = item,
-        id = { it.id },
-        title = { it.title },
-        labels = listOf(
-            { movie -> "Director" },
-            { movie -> "Released" },
-            { movie -> "Genre" },
-            { movie -> "Actors" },
-            { movie -> "Rating" },
-            { movie -> "Plot" }
-        ),
-        contentDescription = listOf(
-            { it.director },
-            { it.year },
-            { it.genre },
-            { it.actors },
-            { it.rating },
-            { it.plot }
-        ),
-        getImages = { it.images },
-        onClick = { movieId -> onClick(movieId) }
+    Box(
+        modifier = Modifier
+            .height(150.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+
+        MovieImage(imageUrl)
+
+        FavoriteIcon(isFavorite = isFavorite, onFavoriteClick)
+    }
+}
+
+@Composable
+fun MovieImage(imageUrl: String){
+    SubcomposeAsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .crossfade(true)
+            .build(),
+        contentScale = ContentScale.Crop,
+        contentDescription = "movie poster",
+        loading = {
+            CircularProgressIndicator()
+        }
     )
+}
+
+@Composable
+fun FavoriteIcon(
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        contentAlignment = Alignment.TopEnd
+    ){
+        Icon(
+            modifier = Modifier.clickable {
+                onFavoriteClick() },
+            tint = MaterialTheme.colorScheme.secondary,
+            imageVector =
+            if (isFavorite) {
+                Icons.Filled.Favorite
+            } else {
+                Icons.Default.FavoriteBorder
+            },
+
+            contentDescription = "Add to favorites")
+    }
+}
+
+
+@Composable
+fun MovieDetails(modifier: Modifier, movie: Movie) {
+    var showDetails by remember {
+        mutableStateOf(false)
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = movie.title)
+        Icon(modifier = Modifier
+            .clickable {
+                showDetails = !showDetails
+            },
+            imageVector =
+            if (showDetails) Icons.Filled.KeyboardArrowDown
+            else Icons.Default.KeyboardArrowUp, contentDescription = "show more")
+    }
+
+
+    AnimatedVisibility(
+        visible = showDetails,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Column (modifier = modifier) {
+            Text(text = "Director: ${movie.director}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Released: ${movie.year}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Actors: ${movie.actors}", style = MaterialTheme.typography.bodySmall)
+            Text(text = "Rating: ${movie.rating}", style = MaterialTheme.typography.bodySmall)
+
+            Divider(modifier = Modifier.padding(3.dp))
+        }
+    }
 }
