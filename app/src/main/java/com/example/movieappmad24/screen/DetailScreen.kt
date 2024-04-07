@@ -1,6 +1,7 @@
 package com.example.movieappmad24.screen
 
 import SingleVisibleObjectGroup
+import Trailer
 import android.util.Log
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,15 +47,15 @@ fun DetailScreen(
             currentMovie?.let { movie ->
                 LazyColumn(modifier = Modifier.padding(innerPadding)) {
                     item {
-                        Spacer(modifier = Modifier.height(8.dp))
                         SingleVisibleObjectGroup(
                             modifier = Modifier.padding(innerPadding),
                             movie = movie,
                             onFavoriteClick = { moviesViewModel.toggleFavoriteMovie(movie.id) }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Trailer(movie)
+                        Spacer(modifier = Modifier.padding(5.dp))
                         CoilImage(getImages = { movie.images }, item = movie)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.padding(5.dp))
                     }
                 }
             }

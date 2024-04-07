@@ -32,6 +32,5 @@ fun WatchlistScreen(
             navController = navController,
             viewModel = moviesViewModel
         )
-
     }
 }

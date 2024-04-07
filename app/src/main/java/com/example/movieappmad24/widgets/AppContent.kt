@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -6,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,10 +37,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.ExoPlayer.*
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
+import com.example.movieappmad24.R
 import com.example.movieappmad24.models.Movie
 import com.example.movieappmad24.models.MoviesViewModel
 import com.example.movieappmad24.models.getMovies
@@ -48,12 +61,12 @@ fun ListOfVisibleObjectGroups(
     movies: List<Movie> = getMovies(),
     navController: NavController,
     viewModel: MoviesViewModel
-){
+) {
     LazyColumn(modifier = modifier) {
         items(movies) { movie ->
             SingleVisibleObjectGroup(
                 movie = movie,
-                onFavoriteClick = {movieId ->
+                onFavoriteClick = { movieId ->
                     viewModel.toggleFavoriteMovie(movieId)
                 },
                 onItemClick = { movieId ->
@@ -70,13 +83,14 @@ fun SingleVisibleObjectGroup(
     movie: Movie,
     onFavoriteClick: (String) -> Unit = {},
     onItemClick: (String) -> Unit = {}
-){
-    Card(modifier = modifier
-        .fillMaxWidth()
-        .padding(5.dp)
-        .clickable {
-            onItemClick(movie.id)
-        },
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .clickable {
+                onItemClick(movie.id)
+            },
         shape = ShapeDefaults.Large,
         elevation = CardDefaults.cardElevation(10.dp)
     ) {
@@ -114,7 +128,7 @@ fun MovieCardHeader(
 }
 
 @Composable
-fun MovieImage(imageUrl: String){
+fun MovieImage(imageUrl: String) {
     SubcomposeAsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
@@ -138,10 +152,11 @@ fun FavoriteIcon(
             .fillMaxSize()
             .padding(10.dp),
         contentAlignment = Alignment.TopEnd
-    ){
+    ) {
         Icon(
             modifier = Modifier.clickable {
-                onFavoriteClick() },
+                onFavoriteClick()
+            },
             tint = MaterialTheme.colorScheme.secondary,
             imageVector =
             if (isFavorite) {
@@ -150,7 +165,8 @@ fun FavoriteIcon(
                 Icons.Default.FavoriteBorder
             },
 
-            contentDescription = "Add to favorites")
+            contentDescription = "Add to favorites"
+        )
     }
 }
 
@@ -169,13 +185,15 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = movie.title)
-        Icon(modifier = Modifier
-            .clickable {
-                showDetails = !showDetails
-            },
+        Icon(
+            modifier = Modifier
+                .clickable {
+                    showDetails = !showDetails
+                },
             imageVector =
             if (showDetails) Icons.Filled.KeyboardArrowDown
-            else Icons.Default.KeyboardArrowUp, contentDescription = "show more")
+            else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
+        )
     }
 
 
@@ -184,14 +202,79 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Column (modifier = modifier) {
-            Text(text = "Director: ${movie.director}", style = MaterialTheme.typography.bodySmall)
-            Text(text = "Released: ${movie.year}", style = MaterialTheme.typography.bodySmall)
-            Text(text = "Genre: ${movie.genre}", style = MaterialTheme.typography.bodySmall)
-            Text(text = "Actors: ${movie.actors}", style = MaterialTheme.typography.bodySmall)
-            Text(text = "Rating: ${movie.rating}", style = MaterialTheme.typography.bodySmall)
+        Column(modifier = modifier) {
+            Text(text = "Director: ${movie.director}")
+            Text(text = "Released: ${movie.year}")
+            Text(text = "Genre: ${movie.genre}")
+            Text(text = "Actors: ${movie.actors}")
+            Text(text = "Rating: ${movie.rating}")
 
             Divider(modifier = Modifier.padding(3.dp))
         }
     }
+}
+
+@Composable
+fun Trailer(movie: Movie) {
+    var lifecycle by remember {
+        mutableStateOf(Lifecycle.Event.ON_CREATE)
+    }
+
+    val context = LocalContext.current
+
+    val mediaItemUri = "android.resource://${context.packageName}/raw/${movie.trailer}"
+    Log.d("MovieTrailer", "MediaItem URI: $mediaItemUri")
+    val mediaItem = MediaItem.fromUri(mediaItemUri)
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(mediaItem)
+            prepare()
+            playWhenReady = true
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    Log.d("MovieTrailer", "Playback state changed: $state")
+                }
+            })
+        }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            lifecycle = event
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            exoPlayer.release()
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    AndroidView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(18f / 9f),
+        factory = {
+            PlayerView(context).also { playerView ->
+                playerView.player = exoPlayer
+            }
+        },
+        update = {
+            when (lifecycle) {
+                Lifecycle.Event.ON_RESUME -> {
+                    it.onPause()
+                    it.player?.pause()
+                }
+
+                Lifecycle.Event.ON_PAUSE -> {
+                    it.onResume()
+                }
+
+                else -> Unit
+            }
+        }
+    )
 }
