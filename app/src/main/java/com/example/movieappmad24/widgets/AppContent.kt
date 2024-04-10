@@ -1,3 +1,5 @@
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -222,9 +224,10 @@ fun Trailer(movie: Movie) {
 
     val context = LocalContext.current
 
-    val mediaItemUri = "android.resource://${context.packageName}/raw/${movie.trailer}"
-    Log.d("MovieTrailer", "MediaItem URI: $mediaItemUri")
-    val mediaItem = MediaItem.fromUri(mediaItemUri)
+    // Construct URI for the trailer using the resource identifier
+    val uri = getResourceUri(context, movie.trailer)
+
+    val mediaItem = MediaItem.fromUri(uri)
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -256,7 +259,7 @@ fun Trailer(movie: Movie) {
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(18f / 9f),
+            .aspectRatio(16f / 9f),
         factory = {
             PlayerView(context).also { playerView ->
                 playerView.player = exoPlayer
@@ -277,4 +280,8 @@ fun Trailer(movie: Movie) {
             }
         }
     )
+}
+
+fun getResourceUri(context: Context, resourceId: Int): Uri {
+    return Uri.parse("android.resource://${context.packageName}/$resourceId")
 }
