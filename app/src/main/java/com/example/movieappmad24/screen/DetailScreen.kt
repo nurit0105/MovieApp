@@ -1,15 +1,14 @@
 package com.example.movieappmad24.screen
 
+import MoviesViewModel
 import SingleVisibleObjectGroup
 import Trailer
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,21 +22,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.movieappmad24.models.MoviesViewModel
 import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.CoilImage
 import com.example.movieappmad24.widgets.SimpleTopAppBar
-import com.example.movieappmad24.models.getMovies
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 
 @Composable
 fun DetailScreen(
-    movieId: String,
+    movieId: Int,
     navController: NavController,
     moviesViewModel: MoviesViewModel
 ) {
-    val currentMovie = moviesViewModel.movies.find { it.id == movieId }
+    val movies by moviesViewModel.movies.collectAsState()
 
-    Log.d("MovieApp", "Navigated to DetailScreen")
+    val currentMovie by remember {
+        mutableStateOf(movies.find { it.id == movieId })
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -56,18 +60,20 @@ fun DetailScreen(
                         SingleVisibleObjectGroup(
                             modifier = Modifier.padding(innerPadding),
                             movie = movie,
-                            onFavoriteClick = { moviesViewModel.toggleFavoriteMovie(movie.id) }
+                            onFavoriteClick = { moviesViewModel.toggleFavoriteMovie(movie) }
                         )
-                        Card(modifier = Modifier
-                            .padding(20.dp)
-                            .background(Color.Black, shape = RoundedCornerShape(16.dp))) {
+                        Card(
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .background(Color.Black, shape = RoundedCornerShape(16.dp))
+                        ) {
                             Row(modifier = Modifier.padding(horizontal = 10.dp)) {
                                 Trailer(movie = movie)
                             }
                         }
-                        Spacer(modifier = Modifier.padding(5.dp))
-                        CoilImage(getImages = { movie.images }, item = movie)
-                        Spacer(modifier = Modifier.padding(5.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
+                        // CoilImage(getImages = { movie.images }, item = movie)
+                        Spacer(modifier = Modifier.height(5.dp))
                     }
                 }
             }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,9 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -47,44 +47,42 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.ExoPlayer.*
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
-import coil.compose.SubcomposeAsyncImage
-import coil.request.ImageRequest
 import com.example.movieappmad24.R
-import com.example.movieappmad24.models.Movie
-import com.example.movieappmad24.models.MoviesViewModel
-import com.example.movieappmad24.models.getMovies
+import com.example.movieappmad24.data.Movie
 
 @Composable
 fun ListOfVisibleObjectGroups(
-    modifier: Modifier,
-    movies: List<Movie> = getMovies(),
+    modifier: Modifier = Modifier,
+    movies: List<Movie>,
     navController: NavController,
     viewModel: MoviesViewModel
 ) {
+    // Log the recomposition of the function
+    Log.d("ListOfVisibleObjectGroups", "Recomposing")
+
+    // Use LazyColumn to display the list of movies
     LazyColumn(modifier = modifier) {
         items(movies) { movie ->
             SingleVisibleObjectGroup(
                 movie = movie,
-                onFavoriteClick = { movieId ->
-                    viewModel.toggleFavoriteMovie(movieId)
+                onFavoriteClick = {
+                    viewModel.toggleFavoriteMovie(movie)
                 },
                 onItemClick = { movieId ->
-                    navController.navigate("detail/${movieId}")
+                    navController.navigate("detail/$movieId")
                 }
             )
         }
     }
 }
-
 @Composable
 fun SingleVisibleObjectGroup(
     modifier: Modifier = Modifier,
     movie: Movie,
-    onFavoriteClick: (String) -> Unit = {},
-    onItemClick: (String) -> Unit = {}
+    onFavoriteClick: (Movie) -> Unit = {},
+    onItemClick: (Int) -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -99,9 +97,11 @@ fun SingleVisibleObjectGroup(
         Column {
 
             MovieCardHeader(
-                imageUrl = movie.images[0],
+                // imageUrl = "res/drawable/movie_image.jpg", //movie.images[0],
                 isFavorite = movie.isFavorite,
-                onFavoriteClick = { onFavoriteClick(movie.id) }
+                onFavoriteClick = {
+                    onFavoriteClick(movie)
+                }
             )
 
             MovieDetails(modifier = modifier.padding(12.dp), movie = movie)
@@ -112,9 +112,9 @@ fun SingleVisibleObjectGroup(
 
 @Composable
 fun MovieCardHeader(
-    imageUrl: String,
-    isFavorite: Boolean = false,
-    onFavoriteClick: () -> Unit = {}
+    // imageUrl: String,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -122,16 +122,18 @@ fun MovieCardHeader(
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
+        MovieImage()
 
-        MovieImage(imageUrl)
-
-        FavoriteIcon(isFavorite = isFavorite, onFavoriteClick)
+        FavoriteIcon(
+            isFavorite = isFavorite,
+            onFavoriteClick = onFavoriteClick
+        )
     }
 }
 
 @Composable
-fun MovieImage(imageUrl: String) {
-    SubcomposeAsyncImage(
+fun MovieImage() {
+    /* SubcomposeAsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
             .crossfade(true)
@@ -141,13 +143,15 @@ fun MovieImage(imageUrl: String) {
         loading = {
             CircularProgressIndicator()
         }
-    )
+    ) */
+
+    Image(painter = painterResource(id = R.drawable.movie_image), contentDescription = "Placeholder")
 }
 
 @Composable
 fun FavoriteIcon(
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit = {}
+isFavorite: Boolean,
+onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -166,8 +170,7 @@ fun FavoriteIcon(
             } else {
                 Icons.Default.FavoriteBorder
             },
-
-            contentDescription = "Add to favorites"
+            contentDescription = "Favorite Icon"
         )
     }
 }

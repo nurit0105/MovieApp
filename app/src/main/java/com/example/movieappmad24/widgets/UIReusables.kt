@@ -122,18 +122,18 @@ fun <T> CoilImage(
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         items(images.size) { index ->
-           Card(
-               shape = RoundedCornerShape(8.dp),
-               modifier = Modifier
-                   .size(300.dp)
-           ){
-               Image(
-                   painter = rememberAsyncImagePainter(images[index]),
-                   contentDescription = "Image $index",
-                   contentScale = ContentScale.Crop,
-                   modifier = Modifier.fillMaxHeight()
-               )
-           }
+            Card(
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .size(300.dp)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(images[index]),
+                    contentDescription = "Image $index",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxHeight()
+                )
+            }
         }
     }
 }
