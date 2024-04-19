@@ -14,6 +14,8 @@ class MovieRepository(private val movieDao: MovieDao) {
 
     suspend fun getAllMovies() = movieDao.readAll()
 
+    suspend fun getCountMovies() = movieDao.countMovies()
+
     companion object {
         @Volatile
         private var Instance: MovieRepository? = null

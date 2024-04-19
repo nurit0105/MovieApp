@@ -6,9 +6,9 @@ import androidx.room.PrimaryKey
 import com.example.movieappmad24.R
 
 @Entity
-class Movie(
+data class Movie(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0, // Standardwert für auto-generierten Primärschlüssel
+    val id: Int = 0,
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "year")
@@ -27,7 +27,11 @@ class Movie(
     val rating: String,
     @ColumnInfo(name = "isFavorite")
     var isFavorite: Boolean = false
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+}
 
 fun getMovies(): List<Movie> {
     return listOf(

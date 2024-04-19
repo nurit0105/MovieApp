@@ -25,4 +25,7 @@ interface MovieDao {
     fun getMovieById(movieId: Int): Movie
     @Insert
     suspend fun addMovies(movies: List<Movie>)
+
+    @Query("SELECT COUNT(*) FROM movie")
+    suspend fun countMovies(): Int
 }

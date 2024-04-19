@@ -29,8 +29,8 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     val movieRepository = MovieRepository.getInstance(MovieDB.getDB(context).movieDao())
-                    val movies = moviesViewModel.movies.firstOrNull()
-                    if (movies.isNullOrEmpty()) {
+                    val movieCount = movieRepository.getCountMovies()
+                    if (movieCount == 0) {
                         movieRepository.addMovies(getMovies())
                     }
                 }
