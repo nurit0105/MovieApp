@@ -1,9 +1,9 @@
 package com.example.movieappmad24
 
-import MoviesViewModel
+import com.example.movieappmad24.repositories.MovieRepository
+import com.example.movieappmad24.models.MoviesViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.movieappmad24.repositories.MovieRepository
 
 //TODO: google Factory Pattern
 class MovieViewModelFactory(private val repository: MovieRepository) : ViewModelProvider.Factory {

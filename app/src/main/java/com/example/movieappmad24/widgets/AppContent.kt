@@ -1,10 +1,12 @@
+package com.example.movieappmad24.widgets
+
+
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,9 +40,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -49,39 +52,45 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
-import com.example.movieappmad24.R
-import com.example.movieappmad24.data.Movie
+import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
+import com.example.movieappmad24.data.MovieWithImages
+import com.example.movieappmad24.models.MoviesViewModel
+
 
 @Composable
 fun ListOfVisibleObjectGroups(
     modifier: Modifier = Modifier,
-    movies: List<Movie>,
+    movies: List<MovieWithImages>,
     navController: NavController,
     viewModel: MoviesViewModel
 ) {
-    // Log the recomposition of the function
-    Log.d("ListOfVisibleObjectGroups", "Recomposing")
+    Log.d("ListOfVisibleObjectGroups", "Displaying ${movies.size} movies")
 
-    // Use LazyColumn to display the list of movies
     LazyColumn(modifier = modifier) {
-        items(movies) { movie ->
-            SingleVisibleObjectGroup(
-                movie = movie,
-                onFavoriteClick = {
-                    viewModel.toggleFavoriteMovie(movie)
-                },
-                onItemClick = { movieId ->
-                    navController.navigate("detail/$movieId")
-                }
-            )
+        try {
+            items(movies) { movieWithImages ->
+                SingleVisibleObjectGroup(
+                    movieWithImages = movieWithImages,
+                    onFavoriteClick = {
+                        viewModel.toggleFavoriteMovie(movieWithImages)
+                    },
+                    onItemClick = { movieId ->
+                        navController.navigate("detail/$movieId")
+                    }
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("ListOfVisibleObjectGroups", "Error displaying movies: ${e.message}")
         }
     }
 }
+
 @Composable
 fun SingleVisibleObjectGroup(
     modifier: Modifier = Modifier,
-    movie: Movie,
-    onFavoriteClick: (Movie) -> Unit = {},
+    movieWithImages: MovieWithImages,
+    onFavoriteClick: (MovieWithImages) -> Unit = {},
     onItemClick: (Int) -> Unit = {}
 ) {
     Card(
@@ -89,30 +98,29 @@ fun SingleVisibleObjectGroup(
             .fillMaxWidth()
             .padding(5.dp)
             .clickable {
-                onItemClick(movie.id)
+                onItemClick(movieWithImages.movie.id)
             },
         shape = ShapeDefaults.Large,
         elevation = CardDefaults.cardElevation(10.dp)
     ) {
         Column {
 
+            // Movie header
             MovieCardHeader(
-                // imageUrl = "res/drawable/movie_image.jpg", //movie.images[0],
-                isFavorite = movie.isFavorite,
+                imageUrl = if (movieWithImages.images.isNotEmpty()) movieWithImages.images[0].url else "",
+                isFavorite = movieWithImages.movie.isFavorite,
                 onFavoriteClick = {
-                    onFavoriteClick(movie)
+                    onFavoriteClick(movieWithImages)
                 }
             )
-
-            MovieDetails(modifier = modifier.padding(12.dp), movie = movie)
-
+            MovieDetails(modifier = modifier.padding(12.dp), movieWithImages = movieWithImages)
         }
     }
 }
 
 @Composable
 fun MovieCardHeader(
-    // imageUrl: String,
+    imageUrl: String,
     isFavorite: Boolean,
     onFavoriteClick: () -> Unit
 ) {
@@ -122,7 +130,7 @@ fun MovieCardHeader(
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        MovieImage()
+        MovieImage(imageUrl)
 
         FavoriteIcon(
             isFavorite = isFavorite,
@@ -132,8 +140,8 @@ fun MovieCardHeader(
 }
 
 @Composable
-fun MovieImage() {
-    /* SubcomposeAsyncImage(
+fun MovieImage(imageUrl: String) {
+    SubcomposeAsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(imageUrl)
             .crossfade(true)
@@ -142,16 +150,18 @@ fun MovieImage() {
         contentDescription = "movie poster",
         loading = {
             CircularProgressIndicator()
+        },
+        error = {
+            Text(text = "Failed to load image")
+            Log.e("MovieImage", "Failed to load image URL: $imageUrl")
         }
-    ) */
-
-    Image(painter = painterResource(id = R.drawable.movie_image), contentDescription = "Placeholder")
+    )
 }
 
 @Composable
 fun FavoriteIcon(
-isFavorite: Boolean,
-onFavoriteClick: () -> Unit
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -175,9 +185,8 @@ onFavoriteClick: () -> Unit
     }
 }
 
-
 @Composable
-fun MovieDetails(modifier: Modifier, movie: Movie) {
+fun MovieDetails(modifier: Modifier, movieWithImages: MovieWithImages) {
     var showDetails by remember {
         mutableStateOf(false)
     }
@@ -189,7 +198,7 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = movie.title)
+        Text(text = movieWithImages.movie.title)
         Icon(
             modifier = Modifier
                 .clickable {
@@ -197,10 +206,10 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
                 },
             imageVector =
             if (showDetails) Icons.Filled.KeyboardArrowDown
-            else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
+            else Icons.Default.KeyboardArrowUp,
+            contentDescription = "show more"
         )
     }
-
 
     AnimatedVisibility(
         visible = showDetails,
@@ -208,11 +217,11 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
         exit = fadeOut()
     ) {
         Column(modifier = modifier) {
-            Text(text = "Director: ${movie.director}")
-            Text(text = "Released: ${movie.year}")
-            Text(text = "Genre: ${movie.genre}")
-            Text(text = "Actors: ${movie.actors}")
-            Text(text = "Rating: ${movie.rating}")
+            Text(text = "Director: ${movieWithImages.movie.director}")
+            Text(text = "Released: ${movieWithImages.movie.year}")
+            Text(text = "Genre: ${movieWithImages.movie.genre}")
+            Text(text = "Actors: ${movieWithImages.movie.actors}")
+            Text(text = "Rating: ${movieWithImages.movie.rating}")
 
             Divider(modifier = Modifier.padding(3.dp))
         }
@@ -220,15 +229,14 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
 }
 
 @Composable
-fun Trailer(movie: Movie) {
+fun Trailer(movieWithImages: MovieWithImages) {
     var lifecycle by remember {
         mutableStateOf(Lifecycle.Event.ON_CREATE)
     }
 
     val context = LocalContext.current
 
-    // Construct URI for the trailer using the resource identifier
-    val uri = getResourceUri(context, movie.trailer)
+    val uri = getResourceUri(context, movieWithImages.movie.trailer)
 
     val mediaItem = MediaItem.fromUri(uri)
 

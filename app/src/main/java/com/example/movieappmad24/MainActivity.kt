@@ -1,6 +1,6 @@
 package com.example.movieappmad24
 
-import MoviesViewModel
+import com.example.movieappmad24.models.MoviesViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,16 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.movieappmad24.data.MovieDB
 import com.example.movieappmad24.di.InjectorUtils
-import com.example.movieappmad24.data.getMovies
-import com.example.movieappmad24.repositories.MovieRepository
 import com.example.movieappmad24.ui.theme.MovieAppMAD24Theme
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,17 +25,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             MovieAppMAD24Theme {
                 val context = LocalContext.current
-                val moviesViewModel: MoviesViewModel = viewModel(factory = InjectorUtils.provideMovieViewModelFactory(context))
+                val moviesViewModel: MoviesViewModel =
+                    viewModel(factory = InjectorUtils.provideMovieViewModelFactory(context))
+                val navController = rememberNavController()
+
+                val coroutineScope = rememberCoroutineScope()
 
                 LaunchedEffect(Unit) {
-                    val movieRepository = MovieRepository.getInstance(MovieDB.getDB(context).movieDao())
-                    val movieCount = movieRepository.getCountMovies()
-                    if (movieCount == 0) {
-                        movieRepository.addMovies(getMovies())
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val movieRepository = InjectorUtils.getMovieRepository(context)
+                        val movieCount = movieRepository.getCountMovies()
+
+                        if (movieCount == 0) {
+                            val moviesWithImagesList =
+                                movieRepository.getAllMoviesWithImages().first()
+                            movieRepository.addMovies(moviesWithImagesList)
+                        }
                     }
                 }
 
-                val navController = rememberNavController()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

@@ -1,27 +1,64 @@
 package com.example.movieappmad24.repositories
 
+import android.util.Log
 import com.example.movieappmad24.data.MovieDao
-import com.example.movieappmad24.data.Movie
+import com.example.movieappmad24.data.MovieWithImages
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 class MovieRepository(private val movieDao: MovieDao) {
-    suspend fun add(movie: Movie) = movieDao.add(movie)
-    suspend fun delete(movie: Movie) = movieDao.delete(movie)
-    suspend fun update(movie: Movie) = movieDao.update(movie)
 
-    suspend fun addMovies(movies: List<Movie>) {
-        movieDao.addMovies(movies)
+    suspend fun getAllMoviesWithImages(): Flow<List<MovieWithImages>> {
+        return flow {
+            val moviesWithImages = movieDao.allMoviesWithImages()
+            Log.d("MovieRepository", "Fetched ${moviesWithImages.size} movies with images")
+            emit(moviesWithImages)
+        }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun getAllMovies() = movieDao.readAll()
 
-    suspend fun getCountMovies() = movieDao.countMovies()
+    private suspend fun addMovieWithImages(movieWithImages: MovieWithImages) {
+        withContext(Dispatchers.IO) {
+            movieDao.addMovie(movieWithImages.movie)
+            movieWithImages.images.forEach { movieImage ->
+                movieDao.addMovieImage(movieImage)
+            }
+        }
+    }
+
+    suspend fun addMovies(movieWithImagesList: List<MovieWithImages>) {
+        withContext(Dispatchers.IO) {
+            movieWithImagesList.forEach { movieWithImages ->
+                addMovieWithImages(movieWithImages)
+            }
+        }
+    }
+
+    suspend fun getCountMovies(): Int {
+        return movieDao.countMovies()
+    }
+
+    suspend fun update(movieWithImages: MovieWithImages) {
+        withContext(Dispatchers.IO) {
+            movieDao.updateMovie(movieWithImages.movie)
+            movieWithImages.images.forEach { movieImage ->
+                movieDao.updateMovieImage(movieImage)
+            }
+        }
+    }
 
     companion object {
         @Volatile
-        private var Instance: MovieRepository? = null
+        private var instance: MovieRepository? = null
 
-        fun getInstance(dao: MovieDao) = Instance ?: synchronized(this) {
-            Instance ?: MovieRepository(dao).also { Instance = it }
+        fun getInstance(dao: MovieDao): MovieRepository {
+            return instance ?: synchronized(this) {
+                instance ?: MovieRepository(dao).also { instance = it }
+            }
         }
     }
 }
+

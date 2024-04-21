@@ -1,6 +1,6 @@
 package com.example.movieappmad24
 
-import MoviesViewModel
+import com.example.movieappmad24.models.MoviesViewModel
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost

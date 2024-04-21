@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
+import com.example.movieappmad24.data.MovieWithImages
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,11 +111,10 @@ fun SimpleBottomAppBar(navController: NavController) {
 }
 
 @Composable
-fun <T> CoilImage(
-    getImages: (T) -> List<String>,
-    item: T
+fun CoilImage(
+    movieWithImages: MovieWithImages
 ) {
-    val images = getImages(item)
+    val images = movieWithImages.images.map { it.url }
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),

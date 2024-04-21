@@ -1,38 +1,49 @@
+package com.example.movieappmad24.models
+
+import android.util.Log
+import com.example.movieappmad24.repositories.MovieRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieappmad24.data.Movie
-import com.example.movieappmad24.repositories.MovieRepository
+import com.example.movieappmad24.data.MovieWithImages
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(private val repository: MovieRepository) : ViewModel() {
-    private val _movies = MutableStateFlow<List<Movie>>(emptyList())
-    val movies: StateFlow<List<Movie>> = _movies.asStateFlow()
+    private val _movies = MutableStateFlow<List<MovieWithImages>>(emptyList())
+    val movies: StateFlow<List<MovieWithImages>> = _movies
 
-    private val _favoriteMovies = MutableStateFlow<List<Movie>>(emptyList())
-    val favoriteMovies: StateFlow<List<Movie>> = _favoriteMovies.asStateFlow()
+    private val _favoriteMovies = MutableStateFlow<List<MovieWithImages>>(emptyList())
+    val favoriteMovies: StateFlow<List<MovieWithImages>> = _favoriteMovies
 
     init {
         viewModelScope.launch {
-            repository.getAllMovies().collect { movieList ->
+            repository.getAllMoviesWithImages().collectLatest { movieList ->
+                Log.d("MoviesViewModel", "Received ${movieList.size} movies")
                 _movies.value = movieList
-                _favoriteMovies.value = movieList.filter { it.isFavorite }
+                _favoriteMovies.value = movieList.filter { it.movie.isFavorite }
             }
         }
     }
 
-    fun toggleFavoriteMovie(movie: Movie) {
-        movie.isFavorite = !movie.isFavorite
+    fun toggleFavoriteMovie(movieWithImages: MovieWithImages) {
+        viewModelScope.launch(Dispatchers.IO) {
+            movieWithImages.movie.isFavorite = !movieWithImages.movie.isFavorite
 
-        viewModelScope.launch {
-            repository.update(movie)
-            val updatedMovies = movies.value.map { m ->
-                if (m.id == movie.id) movie else m
+            try {
+                repository.update(movieWithImages)
+
+                val updatedMovies = movies.value.map { m ->
+                    if (m.movie.id == movieWithImages.movie.id) movieWithImages else m
+                }
+                _movies.value = updatedMovies
+                _favoriteMovies.value = updatedMovies.filter { it.movie.isFavorite }
+            } catch (e: Exception) {
+                Log.e("MoviesViewModel", "Error updating movie with images", e)
             }
-            _movies.value = updatedMovies
-            _favoriteMovies.value = updatedMovies.filter { it.isFavorite }
         }
     }
 }
+

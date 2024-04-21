@@ -3,19 +3,13 @@ package com.example.movieappmad24.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(
-    tableName = "movie_image",
-    foreignKeys = [
-        ForeignKey(
-            entity = Movie::class,
-            parentColumns = ["id"],
-            childColumns = ["movieId"],
-        )
-    ]
-)
-data class MovieImage(
+@Entity(tableName = "movie_image", foreignKeys = [
+    ForeignKey(entity = Movie::class, parentColumns = ["id"], childColumns = ["movieId"], onDelete = ForeignKey.CASCADE)
+], indices = [Index(value = ["movieId"])])
+class MovieImage(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "movieId")
