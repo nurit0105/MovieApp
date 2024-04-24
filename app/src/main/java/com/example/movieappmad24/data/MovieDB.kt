@@ -4,26 +4,52 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 
 @Database(
     entities = [Movie::class, MovieImage::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
+
+    // Add a data population function
+    fun populateDatabase(context: Context) {
+        val dao = movieDao()
+
+        // Get initial data
+        val initialMovies = getMovies()
+        val initialMovieImages = getMovieImage()
+
+        // Use a coroutine to add data to the database
+        runBlocking(Dispatchers.IO) {
+            initialMovies.forEach { movie ->
+                dao.addMovie(movie)
+                initialMovieImages.filter { it.movieId == movie.id }.forEach { movieImage ->
+                    dao.addMovieImage(movieImage)
+                }
+            }
+        }
+    }
 
     companion object {
         @Volatile
         private var instance: MovieDB? = null
 
         fun getDB(context: Context): MovieDB {
-            return instance ?: synchronized(this) {
+            val db = instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MovieDB::class.java, "movie_db")
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }
             }
+
+            // Populate the database with data on first launch
+            db.populateDatabase(context)
+
+            return db
         }
     }
 }

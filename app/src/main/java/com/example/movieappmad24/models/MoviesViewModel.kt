@@ -21,9 +21,8 @@ class MoviesViewModel(private val repository: MovieRepository) : ViewModel() {
     init {
         viewModelScope.launch {
             repository.getAllMoviesWithImages().collectLatest { movieList ->
-                Log.d("MoviesViewModel", "Received ${movieList.size} movies")
+                Log.d("MoviesViewModel", "Received ${movieList.size} movies with images")
                 _movies.value = movieList
-                _favoriteMovies.value = movieList.filter { it.movie.isFavorite }
             }
         }
     }

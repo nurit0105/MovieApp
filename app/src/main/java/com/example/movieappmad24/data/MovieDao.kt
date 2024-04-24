@@ -28,6 +28,10 @@ interface MovieDao {
     suspend fun deleteMovieImage(movieImage: MovieImage)
 
     @Transaction
+    @Query("SELECT * FROM movie")
+    fun getAllMoviesWithImages(): List<MovieWithImages>
+
+    @Transaction
     @Query("SELECT * FROM movie WHERE id = :movieId")
     fun getMovieWithImages(movieId: Int): MovieWithImages
     @Transaction

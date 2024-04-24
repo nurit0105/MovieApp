@@ -13,14 +13,13 @@ class MovieRepository(private val movieDao: MovieDao) {
 
     suspend fun getAllMoviesWithImages(): Flow<List<MovieWithImages>> {
         return flow {
-            val moviesWithImages = movieDao.allMoviesWithImages()
+            val moviesWithImages = movieDao.getAllMoviesWithImages()
             Log.d("MovieRepository", "Fetched ${moviesWithImages.size} movies with images")
             emit(moviesWithImages)
         }.flowOn(Dispatchers.IO)
     }
 
-
-    private suspend fun addMovieWithImages(movieWithImages: MovieWithImages) {
+    suspend fun addMovieWithImages(movieWithImages: MovieWithImages) {
         withContext(Dispatchers.IO) {
             movieDao.addMovie(movieWithImages.movie)
             movieWithImages.images.forEach { movieImage ->
@@ -31,8 +30,12 @@ class MovieRepository(private val movieDao: MovieDao) {
 
     suspend fun addMovies(movieWithImagesList: List<MovieWithImages>) {
         withContext(Dispatchers.IO) {
-            movieWithImagesList.forEach { movieWithImages ->
-                addMovieWithImages(movieWithImages)
+            try {
+                movieWithImagesList.forEach { movieWithImages ->
+                    addMovieWithImages(movieWithImages)
+                }
+            } catch (e: Exception) {
+                Log.e("MovieRepository", "Error adding movies: ${e.message}")
             }
         }
     }
