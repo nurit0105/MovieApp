@@ -19,6 +19,7 @@ class MovieRepository(private val movieDao: MovieDao) {
         }.flowOn(Dispatchers.IO)
     }
 
+
     suspend fun getCountMovies(): Int {
         return movieDao.countMovies()
     }

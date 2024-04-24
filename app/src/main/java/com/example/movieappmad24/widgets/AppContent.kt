@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,15 +71,11 @@ fun ListOfVisibleObjectGroups(
     LazyColumn(modifier = modifier) {
         try {
             items(movies) { movieWithImages ->
-                SingleVisibleObjectGroup(
-                    movieWithImages = movieWithImages,
-                    onFavoriteClick = {
-                        viewModel.toggleFavoriteMovie(movieWithImages)
-                    },
-                    onItemClick = { movieId ->
-                        navController.navigate("detail/$movieId")
-                    }
-                )
+                SingleVisibleObjectGroup(movieWithImages = movieWithImages, onFavoriteClick = {
+                    viewModel.toggleFavoriteMovie(movieWithImages)
+                }, onItemClick = { movieId ->
+                    navController.navigate("detail/$movieId")
+                })
             }
         } catch (e: Exception) {
             Log.e("ListOfVisibleObjectGroups", "Error displaying movies: ${e.message}")
@@ -99,20 +96,12 @@ fun SingleVisibleObjectGroup(
             .padding(5.dp)
             .clickable {
                 onItemClick(movieWithImages.movie.id)
-            },
-        shape = ShapeDefaults.Large,
-        elevation = CardDefaults.cardElevation(10.dp)
+            }, shape = ShapeDefaults.Large, elevation = CardDefaults.cardElevation(10.dp)
     ) {
         Column {
-
-            // Movie header
-            MovieCardHeader(
-                imageUrl = if (movieWithImages.images.isNotEmpty()) movieWithImages.images[0].url else "",
-                isFavorite = movieWithImages.movie.isFavorite,
-                onFavoriteClick = {
-                    onFavoriteClick(movieWithImages)
-                }
-            )
+            MovieCardHeader(movieWithImages = movieWithImages, onFavoriteClick = {
+                onFavoriteClick(movieWithImages)
+            })
             MovieDetails(modifier = modifier.padding(12.dp), movieWithImages = movieWithImages)
         }
     }
@@ -120,67 +109,71 @@ fun SingleVisibleObjectGroup(
 
 @Composable
 fun MovieCardHeader(
-    imageUrl: String,
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit
+    movieWithImages: MovieWithImages, onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .height(150.dp)
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth(), contentAlignment = Alignment.Center
     ) {
-        MovieImage(imageUrl)
+        // Check if there are images and display them
+        if (movieWithImages.images.isNotEmpty()) {
+            MovieImage(imageUrls = movieWithImages.images.map { it.url })
+        }
 
         FavoriteIcon(
-            isFavorite = isFavorite,
-            onFavoriteClick = onFavoriteClick
+            isFavorite = movieWithImages.movie.isFavorite, onFavoriteClick = onFavoriteClick
         )
     }
 }
 
 @Composable
-fun MovieImage(imageUrl: String) {
-    SubcomposeAsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(imageUrl)
-            .crossfade(true)
-            .build(),
-        contentScale = ContentScale.Crop,
-        contentDescription = "movie poster",
-        loading = {
-            CircularProgressIndicator()
-        },
-        error = {
-            Text(text = "Failed to load image")
-            Log.e("MovieImage", "Failed to load image URL: $imageUrl")
+fun MovieImage(imageUrls: List<String>) {
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    val context = LocalContext.current
+
+    while (currentIndex < imageUrls.size) {
+        val imageUrl = imageUrls[currentIndex]
+
+        val imageRequest = ImageRequest.Builder(context).data(imageUrl).crossfade(true).build()
+
+        SubcomposeAsyncImage(model = imageRequest,
+            contentScale = ContentScale.Crop,
+            contentDescription = "movie poster",
+            loading = {
+                CircularProgressIndicator()
+            },
+            error = {
+                Log.e("MovieImage", "Failed to load image URL: $imageUrl")
+                currentIndex++
+            })
+        if (currentIndex < imageUrls.size) {
+            break
         }
-    )
+    }
+    if (currentIndex >= imageUrls.size) {
+        Text(text = "Failed to load images")
+    }
 }
 
 @Composable
 fun FavoriteIcon(
-    isFavorite: Boolean,
-    onFavoriteClick: () -> Unit
+    isFavorite: Boolean, onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp),
-        contentAlignment = Alignment.TopEnd
+            .padding(10.dp), contentAlignment = Alignment.TopEnd
     ) {
         Icon(
             modifier = Modifier.clickable {
                 onFavoriteClick()
-            },
-            tint = MaterialTheme.colorScheme.secondary,
-            imageVector =
-            if (isFavorite) {
+            }, tint = MaterialTheme.colorScheme.secondary, imageVector = if (isFavorite) {
                 Icons.Filled.Favorite
             } else {
                 Icons.Default.FavoriteBorder
-            },
-            contentDescription = "Favorite Icon"
+            }, contentDescription = "Favorite Icon"
         )
     }
 }
@@ -200,21 +193,15 @@ fun MovieDetails(modifier: Modifier, movieWithImages: MovieWithImages) {
     ) {
         Text(text = movieWithImages.movie.title)
         Icon(
-            modifier = Modifier
-                .clickable {
+            modifier = Modifier.clickable {
                     showDetails = !showDetails
-                },
-            imageVector =
-            if (showDetails) Icons.Filled.KeyboardArrowDown
-            else Icons.Default.KeyboardArrowUp,
-            contentDescription = "show more"
+                }, imageVector = if (showDetails) Icons.Filled.KeyboardArrowDown
+            else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
         )
     }
 
     AnimatedVisibility(
-        visible = showDetails,
-        enter = fadeIn(),
-        exit = fadeOut()
+        visible = showDetails, enter = fadeIn(), exit = fadeOut()
     ) {
         Column(modifier = modifier) {
             Text(text = "Director: ${movieWithImages.movie.director}")
@@ -267,30 +254,26 @@ fun Trailer(movieWithImages: MovieWithImages) {
         }
     }
 
-    AndroidView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(16f / 9f),
-        factory = {
-            PlayerView(context).also { playerView ->
-                playerView.player = exoPlayer
-            }
-        },
-        update = {
-            when (lifecycle) {
-                Lifecycle.Event.ON_RESUME -> {
-                    it.onPause()
-                    it.player?.pause()
-                }
-
-                Lifecycle.Event.ON_PAUSE -> {
-                    it.onResume()
-                }
-
-                else -> Unit
-            }
+    AndroidView(modifier = Modifier
+        .fillMaxWidth()
+        .aspectRatio(16f / 9f), factory = {
+        PlayerView(context).also { playerView ->
+            playerView.player = exoPlayer
         }
-    )
+    }, update = {
+        when (lifecycle) {
+            Lifecycle.Event.ON_RESUME -> {
+                it.onPause()
+                it.player?.pause()
+            }
+
+            Lifecycle.Event.ON_PAUSE -> {
+                it.onResume()
+            }
+
+            else -> Unit
+        }
+    })
 }
 
 fun getResourceUri(context: Context, resourceId: Int): Uri {

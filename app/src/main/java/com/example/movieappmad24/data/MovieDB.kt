@@ -1,6 +1,7 @@
 package com.example.movieappmad24.data
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -15,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 
-    fun populateDatabase(context: Context) {
+     fun populateDatabase(context: Context) {
         val dao = movieDao()
 
         val initialMovies = getMovies()
