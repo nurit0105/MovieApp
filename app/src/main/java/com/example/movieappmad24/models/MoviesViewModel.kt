@@ -23,6 +23,7 @@ class MoviesViewModel(private val repository: MovieRepository) : ViewModel() {
             repository.getAllMoviesWithImages().collectLatest { movieList ->
                 Log.d("MoviesViewModel", "Received ${movieList.size} movies with images")
                 _movies.value = movieList
+                _favoriteMovies.value = movieList.filter { it.movie.isFavorite }
             }
         }
     }

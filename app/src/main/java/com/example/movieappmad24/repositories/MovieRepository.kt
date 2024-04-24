@@ -19,27 +19,6 @@ class MovieRepository(private val movieDao: MovieDao) {
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun addMovieWithImages(movieWithImages: MovieWithImages) {
-        withContext(Dispatchers.IO) {
-            movieDao.addMovie(movieWithImages.movie)
-            movieWithImages.images.forEach { movieImage ->
-                movieDao.addMovieImage(movieImage)
-            }
-        }
-    }
-
-    suspend fun addMovies(movieWithImagesList: List<MovieWithImages>) {
-        withContext(Dispatchers.IO) {
-            try {
-                movieWithImagesList.forEach { movieWithImages ->
-                    addMovieWithImages(movieWithImages)
-                }
-            } catch (e: Exception) {
-                Log.e("MovieRepository", "Error adding movies: ${e.message}")
-            }
-        }
-    }
-
     suspend fun getCountMovies(): Int {
         return movieDao.countMovies()
     }

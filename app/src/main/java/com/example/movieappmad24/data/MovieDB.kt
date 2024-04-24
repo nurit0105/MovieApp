@@ -9,26 +9,27 @@ import kotlinx.coroutines.runBlocking
 
 @Database(
     entities = [Movie::class, MovieImage::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 
-    // Add a data population function
     fun populateDatabase(context: Context) {
         val dao = movieDao()
 
-        // Get initial data
         val initialMovies = getMovies()
         val initialMovieImages = getMovieImage()
 
-        // Use a coroutine to add data to the database
         runBlocking(Dispatchers.IO) {
             initialMovies.forEach { movie ->
-                dao.addMovie(movie)
-                initialMovieImages.filter { it.movieId == movie.id }.forEach { movieImage ->
-                    dao.addMovieImage(movieImage)
+                val exists = dao.movieExists(movie.title) > 0
+
+                if (!exists) {
+                    dao.addMovie(movie)
+                    initialMovieImages.filter { it.movieId == movie.id }.forEach { movieImage ->
+                        dao.addMovieImage(movieImage)
+                    }
                 }
             }
         }
@@ -46,17 +47,9 @@ abstract class MovieDB : RoomDatabase() {
                     .also { instance = it }
             }
 
-            // Populate the database with data on first launch
             db.populateDatabase(context)
 
             return db
         }
     }
 }
-
-
-/* TODO:
-       *   Singelton Pattern nochmal nachschauen "is thread safe"
-       *   google Multithreading and threading in general
-       *   google what synchronized actually means for dummies
- */

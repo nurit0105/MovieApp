@@ -14,4 +14,8 @@ object InjectorUtils {
         val repository = getMovieRepository(context)
         return MovieViewModelFactory(repository = repository)
     }
+
+    fun getMovieDB(context: Context): MovieDB {
+        return MovieDB.getDB(context)
+    }
 }

@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "movie_image", foreignKeys = [
     ForeignKey(entity = Movie::class, parentColumns = ["id"], childColumns = ["movieId"], onDelete = ForeignKey.CASCADE)
 ], indices = [Index(value = ["movieId"])])
-class MovieImage(
+data class MovieImage(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     @ColumnInfo(name = "movieId")

@@ -40,5 +40,9 @@ interface MovieDao {
 
     @Query("SELECT COUNT(*) FROM movie")
     suspend fun countMovies(): Int
+
+    @Query("SELECT COUNT(*) FROM movie WHERE title = :title")
+    suspend fun movieExists(title: String): Int
+
 }
 
