@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -56,7 +57,9 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.movieappmad24.data.MovieWithImages
-import com.example.movieappmad24.models.MoviesViewModel
+import com.example.movieappmad24.models.DetailScreenViewModel
+import com.example.movieappmad24.models.HomeScreenViewModel
+import com.example.movieappmad24.models.WatchlistScreenViewModel
 
 
 @Composable
@@ -64,7 +67,7 @@ fun ListOfVisibleObjectGroups(
     modifier: Modifier = Modifier,
     movies: List<MovieWithImages>,
     navController: NavController,
-    viewModel: MoviesViewModel
+    viewModel: ViewModel
 ) {
     Log.d("ListOfVisibleObjectGroups", "Displaying ${movies.size} movies")
 
@@ -72,13 +75,32 @@ fun ListOfVisibleObjectGroups(
         try {
             items(movies) { movieWithImages ->
                 SingleVisibleObjectGroup(movieWithImages = movieWithImages, onFavoriteClick = {
-                    viewModel.toggleFavoriteMovie(movieWithImages)
-                }, onItemClick = { movieId ->
+                    handleFavoriteClick(movieWithImages, viewModel) },
+                 onItemClick = { movieId ->
                     navController.navigate("detail/$movieId")
                 })
             }
         } catch (e: Exception) {
             Log.e("ListOfVisibleObjectGroups", "Error displaying movies: ${e.message}")
+        }
+    }
+}
+
+fun handleFavoriteClick(movieWithImages: MovieWithImages, viewModel: ViewModel) {
+    when (viewModel) {
+        is HomeScreenViewModel -> {
+            viewModel.toggleFavorite(movieWithImages)
+        }
+        is WatchlistScreenViewModel -> {
+            viewModel.toggleFavoriteMovie(movieWithImages)
+        }
+
+        is DetailScreenViewModel -> {
+            viewModel.toggleFavorite()
+        }
+
+        else -> {
+            Log.w("ListOfVisibleObjectGroups", "Unknown ViewModel type")
         }
     }
 }
@@ -116,7 +138,6 @@ fun MovieCardHeader(
             .height(150.dp)
             .fillMaxWidth(), contentAlignment = Alignment.Center
     ) {
-        // Check if there are images and display them
         if (movieWithImages.images.isNotEmpty()) {
             MovieImage(imageUrls = movieWithImages.images.map { it.url })
         }
@@ -194,8 +215,8 @@ fun MovieDetails(modifier: Modifier, movieWithImages: MovieWithImages) {
         Text(text = movieWithImages.movie.title)
         Icon(
             modifier = Modifier.clickable {
-                    showDetails = !showDetails
-                }, imageVector = if (showDetails) Icons.Filled.KeyboardArrowDown
+                showDetails = !showDetails
+            }, imageVector = if (showDetails) Icons.Filled.KeyboardArrowDown
             else Icons.Default.KeyboardArrowUp, contentDescription = "show more"
         )
     }

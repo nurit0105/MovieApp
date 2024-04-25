@@ -1,25 +1,32 @@
 package com.example.movieappmad24.di
 
-import com.example.movieappmad24.repositories.MovieRepository
 import android.content.Context
-import android.util.Log
-import com.example.movieappmad24.MovieViewModelFactory
+import com.example.movieappmad24.DetailScreenViewModelFactory
+import com.example.movieappmad24.HomeScreenViewModelFactory
+import com.example.movieappmad24.WatchlistScreenViewModelFactory
 import com.example.movieappmad24.data.MovieDB
+import com.example.movieappmad24.repositories.MovieRepository
+
+
 object InjectorUtils {
-    fun getMovieRepository(context: Context): MovieRepository {
-        val database = MovieDB.getDB(context.applicationContext)
-        Log.d("InjectorUtils", "Getting MovieRepository instance")
-        return MovieRepository.getInstance(database.movieDao())
+
+    private fun getMovieRepository(context: Context): MovieRepository {
+        val db = MovieDB.getDB(context)
+        return MovieRepository.getInstance(db.movieDao())
     }
 
-    fun provideMovieViewModelFactory(context: Context): MovieViewModelFactory {
+    fun provideHomeScreenViewModelFactory(context: Context): HomeScreenViewModelFactory {
         val repository = getMovieRepository(context)
-        Log.d("InjectorUtils", "Providing MovieViewModelFactory")
-        return MovieViewModelFactory(repository = repository)
+        return HomeScreenViewModelFactory(repository)
     }
 
-    fun getMovieDB(context: Context): MovieDB {
-        Log.d("InjectorUtils", "Getting MovieDB instance")
-        return MovieDB.getDB(context)
+    fun provideWatchlistScreenViewModelFactory(context: Context): WatchlistScreenViewModelFactory {
+        val repository = getMovieRepository(context)
+        return WatchlistScreenViewModelFactory(repository)
+    }
+
+    fun provideDetailScreenViewModelFactory(context: Context, movieId: Int): DetailScreenViewModelFactory {
+        val repository = getMovieRepository(context)
+        return DetailScreenViewModelFactory(repository, movieId)
     }
 }

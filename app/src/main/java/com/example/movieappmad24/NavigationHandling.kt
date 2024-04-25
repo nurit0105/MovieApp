@@ -1,6 +1,5 @@
 package com.example.movieappmad24
 
-import com.example.movieappmad24.models.MoviesViewModel
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,19 +16,19 @@ sealed class NavigationHandling(val route: String) {
 }
 
 @Composable
-fun AppNavigation(navController: NavHostController, moviesViewModel: MoviesViewModel) {
+fun AppNavigation(navController: NavHostController) {
     NavHost(navController, startDestination = NavigationHandling.Home.route) {
         composable(NavigationHandling.Home.route) {
-            HomeScreen(navController, moviesViewModel = moviesViewModel)
+            HomeScreen(navController)
         }
         composable(NavigationHandling.Detail.route) { backStackEntry ->
             val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
             if (movieId != null) {
-                DetailScreen(movieId, navController, moviesViewModel = moviesViewModel)
+                DetailScreen(movieId, navController)
             }
         }
         composable(NavigationHandling.Watchlist.route) {
-            WatchlistScreen(navController, moviesViewModel = moviesViewModel)
+            WatchlistScreen(navController)
         }
     }
 }
