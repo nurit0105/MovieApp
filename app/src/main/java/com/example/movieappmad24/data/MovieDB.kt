@@ -15,7 +15,17 @@ import kotlinx.coroutines.runBlocking
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 
-    fun populateDatabase(context: Context) {
+    private class DatabaseCallback(private val context: Context) : Callback() {
+        override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+            super.onCreate(db)
+            val database = getDB(context)
+            runBlocking(Dispatchers.IO) {
+                database.populateDatabase()
+            }
+        }
+    }
+
+    fun populateDatabase() {
         val dao = movieDao()
 
         val initialMovies = getMovies()
@@ -44,16 +54,13 @@ abstract class MovieDB : RoomDatabase() {
         private var instance: MovieDB? = null
 
         fun getDB(context: Context): MovieDB {
-            val db = instance ?: synchronized(this) {
+            return instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MovieDB::class.java, "movie_db")
+                    .addCallback(DatabaseCallback(context))
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }
             }
-
-            db.populateDatabase(context)
-
-            return db
         }
     }
 }
