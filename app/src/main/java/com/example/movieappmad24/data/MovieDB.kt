@@ -1,7 +1,6 @@
 package com.example.movieappmad24.data
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -10,13 +9,13 @@ import kotlinx.coroutines.runBlocking
 
 @Database(
     entities = [Movie::class, MovieImage::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
 
-     fun populateDatabase(context: Context) {
+    fun populateDatabase(context: Context) {
         val dao = movieDao()
 
         val initialMovies = getMovies()
@@ -28,9 +27,13 @@ abstract class MovieDB : RoomDatabase() {
 
                 if (!exists) {
                     dao.addMovie(movie)
-                    initialMovieImages.filter { it.movieId == movie.id }.forEach { movieImage ->
-                        dao.addMovieImage(movieImage)
-                    }
+                }
+            }
+
+            initialMovieImages.forEach { movieImage ->
+               val existImages = dao.movieImageExists(movieImage.movieId, movieImage.url)
+                if (existImages == 0) {
+                    dao.addMovieImage(movieImage)
                 }
             }
         }

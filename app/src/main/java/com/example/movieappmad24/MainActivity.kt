@@ -1,6 +1,7 @@
 package com.example.movieappmad24
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,8 +28,11 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 LaunchedEffect(Unit) {
+                    Log.d("MainActivity", "LaunchedEffect: Checking movie count and population")
                     val movieCount = movieRepository.getCountMovies()
+                    Log.d("MainActivity", "Movie count: $movieCount")
                     if (movieCount == 0) {
+                        Log.d("MainActivity", "Populating database")
                         val movieDB = InjectorUtils.getMovieDB(context)
                         movieDB.populateDatabase(context)
                     }
