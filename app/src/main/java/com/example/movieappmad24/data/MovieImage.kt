@@ -24,7 +24,9 @@ data class MovieImage(
     @ColumnInfo(name = "url")
     val url: String
 ) {
-
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
 }
 
 fun getMovieImage(): List<MovieImage> {
