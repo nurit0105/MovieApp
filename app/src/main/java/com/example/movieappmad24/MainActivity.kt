@@ -26,3 +26,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+// TODO: ask Leon or René why the isFavoriteIcon is behaving so damn weird
