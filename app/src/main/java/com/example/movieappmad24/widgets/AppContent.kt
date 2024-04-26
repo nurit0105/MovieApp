@@ -61,7 +61,6 @@ import com.example.movieappmad24.models.DetailScreenViewModel
 import com.example.movieappmad24.models.HomeScreenViewModel
 import com.example.movieappmad24.models.WatchlistScreenViewModel
 
-
 @Composable
 fun ListOfVisibleObjectGroups(
     modifier: Modifier = Modifier,
@@ -85,6 +84,7 @@ fun ListOfVisibleObjectGroups(
         }
     }
 }
+
 
 fun handleFavoriteClick(movieWithImages: MovieWithImages, viewModel: ViewModel) {
     when (viewModel) {
@@ -178,7 +178,7 @@ fun MovieImage(imageUrls: List<String>) {
     }
 }
 
-@Composable
+ @Composable
 fun FavoriteIcon(
     isFavorite: Boolean, onFavoriteClick: () -> Unit
 ) {
@@ -191,13 +191,14 @@ fun FavoriteIcon(
             modifier = Modifier.clickable {
                 onFavoriteClick()
             }, tint = MaterialTheme.colorScheme.secondary, imageVector = if (isFavorite) {
-                Icons.Filled.Favorite
+                Icons.Default.Favorite
             } else {
                 Icons.Default.FavoriteBorder
             }, contentDescription = "Favorite Icon"
         )
     }
 }
+
 
 @Composable
 fun MovieDetails(modifier: Modifier, movieWithImages: MovieWithImages) {

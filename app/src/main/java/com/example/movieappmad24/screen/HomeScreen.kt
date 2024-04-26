@@ -16,13 +16,14 @@ import com.example.movieappmad24.widgets.SimpleBottomAppBar
 import com.example.movieappmad24.widgets.SimpleTopAppBar
 
 
-@Composable
+ @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     val homeScreenViewModel: HomeScreenViewModel = viewModel(factory = InjectorUtils.provideHomeScreenViewModelFactory(context))
     val movies by homeScreenViewModel.movies.collectAsState()
 
-    Scaffold(
+
+     Scaffold(
         topBar = {
             SimpleTopAppBar(title = "Movie App")
         },
@@ -38,5 +39,3 @@ fun HomeScreen(navController: NavController) {
         )
     }
 }
-
-

@@ -21,6 +21,7 @@ class HomeScreenViewModel(private val repository: MovieRepository) : ViewModel()
         }
     }
 
+
     fun toggleFavorite(movieWithImages: MovieWithImages) {
         viewModelScope.launch {
             movieWithImages.movie.isFavorite = !movieWithImages.movie.isFavorite
