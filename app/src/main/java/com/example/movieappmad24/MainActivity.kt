@@ -27,4 +27,5 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// TODO: ask Leon or René why the isFavoriteIcon is behaving so damn weird
+// TODO: ask Leon or René why the isFavoriteIcon is behaving
+//  so damn weird with the Switch between the Screens
