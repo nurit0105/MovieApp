@@ -15,17 +15,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MovieAppMAD24Theme {
-                val navController = rememberNavController()
+                val navController = rememberNavController() // here I set up the NavController
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                  AppNavigation(navController = navController)
+                  AppNavigation(navController = navController) //The Navigation goes through the different screens that the MainActivity calls
                 }
             }
         }
     }
 }
 
-// TODO: ask Leon or René why the isFavoriteIcon is behaving
-//  so damn weird with the Switch between the Screens
+// TODO: ask Leon or René why the isFavoriteIcon is behaving so damn weird with the Switch between the Screens

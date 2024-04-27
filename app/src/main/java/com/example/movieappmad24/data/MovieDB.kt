@@ -7,6 +7,7 @@ import androidx.room.RoomDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
+
 @Database(
     entities = [Movie::class, MovieImage::class],
     version = 9,
@@ -14,16 +15,6 @@ import kotlinx.coroutines.runBlocking
 )
 abstract class MovieDB : RoomDatabase() {
     abstract fun movieDao(): MovieDao
-
-    private class DatabaseCallback(private val context: Context) : Callback() {
-        override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-            super.onCreate(db)
-            val database = getDB(context)
-            runBlocking(Dispatchers.IO) {
-                database.populateDatabase()
-            }
-        }
-    }
 
     fun populateDatabase() {
         val dao = movieDao()
@@ -34,15 +25,14 @@ abstract class MovieDB : RoomDatabase() {
         runBlocking(Dispatchers.IO) {
             initialMovies.forEach { movie ->
                 val exists = dao.movieExists(movie.title) > 0
-
                 if (!exists) {
                     dao.addMovie(movie)
                 }
             }
 
             initialMovieImages.forEach { movieImage ->
-               val existImages = dao.movieImageExists(movieImage.movieId, movieImage.url)
-                if (existImages == 0) {
+                val exists = dao.movieImageExists(movieImage.movieId, movieImage.url)
+                if (exists == 0) {
                     dao.addMovieImage(movieImage)
                 }
             }
@@ -54,13 +44,16 @@ abstract class MovieDB : RoomDatabase() {
         private var instance: MovieDB? = null
 
         fun getDB(context: Context): MovieDB {
-            return instance ?: synchronized(this) {
+            val db = instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MovieDB::class.java, "movie_db")
-                    .addCallback(DatabaseCallback(context))
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }
             }
+
+            db.populateDatabase()
+
+            return db
         }
     }
 }

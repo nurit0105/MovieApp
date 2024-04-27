@@ -34,6 +34,7 @@ import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +61,7 @@ import com.example.movieappmad24.data.MovieWithImages
 import com.example.movieappmad24.models.DetailScreenViewModel
 import com.example.movieappmad24.models.HomeScreenViewModel
 import com.example.movieappmad24.models.WatchlistScreenViewModel
+
 
 @Composable
 fun ListOfVisibleObjectGroups(
@@ -129,7 +131,7 @@ fun SingleVisibleObjectGroup(
     }
 }
 
-@Composable
+/* @Composable
 fun MovieCardHeader(
     movieWithImages: MovieWithImages, onFavoriteClick: () -> Unit
 ) {
@@ -143,10 +145,39 @@ fun MovieCardHeader(
         }
 
         FavoriteIcon(
-            isFavorite = movieWithImages.movie.isFavorite, onFavoriteClick = onFavoriteClick
+            isFavorite = movieWithImages.movie.isFavorite,
+            onFavoriteClick = onFavoriteClick
+        )
+    }
+} */
+
+@Composable
+fun MovieCardHeader(
+    movieWithImages: MovieWithImages,
+    onFavoriteClick: () -> Unit
+) {
+    val isFavoriteState = remember { mutableStateOf(movieWithImages.movie.isFavorite) }
+    LaunchedEffect(movieWithImages.movie.isFavorite) {
+        isFavoriteState.value = movieWithImages.movie.isFavorite
+    }
+    Box(
+        modifier = Modifier
+            .height(150.dp)
+            .fillMaxWidth(), contentAlignment = Alignment.Center
+    ) {
+        if (movieWithImages.images.isNotEmpty()) {
+            MovieImage(imageUrls = movieWithImages.images.map { it.url })
+        }
+        FavoriteIcon(
+            isFavorite = isFavoriteState.value,
+            onFavoriteClick = {
+                onFavoriteClick()
+                isFavoriteState.value = !isFavoriteState.value
+            }
         )
     }
 }
+
 
 @Composable
 fun MovieImage(imageUrls: List<String>) {
@@ -180,7 +211,8 @@ fun MovieImage(imageUrls: List<String>) {
 
  @Composable
 fun FavoriteIcon(
-    isFavorite: Boolean, onFavoriteClick: () -> Unit
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
