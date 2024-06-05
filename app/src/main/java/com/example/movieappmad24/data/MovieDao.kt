@@ -18,33 +18,18 @@ interface MovieDao {
     @Delete
     suspend fun deleteMovie(movie: Movie)
 
-    @Insert
-    suspend fun addMovieImage(movieImage: MovieImage)
-
-    @Update
-    suspend fun updateMovieImage(movieImage: MovieImage)
-
-    @Delete
-    suspend fun deleteMovieImage(movieImage: MovieImage)
-
     @Transaction
     @Query("SELECT * FROM movie")
-    fun getAllMoviesWithImages(): List<MovieWithImages>
+    fun getAllMovies(): List<Movie>
 
     @Transaction
     @Query("SELECT * FROM movie WHERE id = :movieId")
-    fun getMovieWithImages(movieId: Int): MovieWithImages
-    @Transaction
-    @Query("SELECT * FROM movie")
-    fun allMoviesWithImages(): List<MovieWithImages>
+    fun getMovie(movieId: Int): Movie
 
     @Query("SELECT COUNT(*) FROM movie")
     suspend fun countMovies(): Int
 
-    @Query("SELECT COUNT(*) FROM movie WHERE title = :title")
+    @Query("SELECT COUNT(*) FROM movie WHERE orTitle = :title")
     suspend fun movieExists(title: String): Int
-
-    @Query("SELECT COUNT(*) FROM movie_image WHERE movieId = :movieId AND url = :url")
-    suspend fun movieImageExists(movieId: Int, url: String): Int
 }
 

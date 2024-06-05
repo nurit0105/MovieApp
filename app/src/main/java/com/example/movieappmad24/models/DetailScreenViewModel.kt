@@ -2,7 +2,7 @@ package com.example.movieappmad24.models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.movieappmad24.data.MovieWithImages
+import com.example.movieappmad24.data.Movie
 import com.example.movieappmad24.repositories.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,26 +10,26 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class DetailScreenViewModel(private val repository: MovieRepository, private val movieId: Int) : ViewModel() {
-    private val _movies = MutableStateFlow<MovieWithImages?>(null)
-    val movies: StateFlow<MovieWithImages?> = _movies
+    private val _movies = MutableStateFlow<Movie?>(null)
+    val movies: StateFlow<Movie?> = _movies
 
     init {
         viewModelScope.launch {
-            repository.getAllMoviesWithImages().collectLatest { movieList ->
-                val movieWithImages = movieList.find { it.movie.id == movieId }
-                _movies.value = movieWithImages
+            repository.getAllMovies().collectLatest { movieList ->
+                val movie = movieList.find { it.id == movieId }
+                _movies.value = movie
             }
         }
     }
 
     fun toggleFavorite() {
-        val movieWithImages = _movies.value
-        if (movieWithImages != null) {
+        val movie = _movies.value
+        if (movie != null) {
             viewModelScope.launch {
-                movieWithImages.movie.isFavorite = !movieWithImages.movie.isFavorite
+                movie.isFavorite = !movie.isFavorite
 
-                repository.update(movieWithImages)
-                _movies.value = movieWithImages
+                repository.update(movie)
+                _movies.value = movie
             }
         }
     }

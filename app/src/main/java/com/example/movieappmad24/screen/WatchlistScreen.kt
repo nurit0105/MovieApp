@@ -24,7 +24,7 @@ fun WatchlistScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
-            SimpleTopAppBar(title = "Your Watchlist")
+            SimpleTopAppBar(title = "Favorites")
         },
         bottomBar = {
             SimpleBottomAppBar(navController = navController)

@@ -9,8 +9,8 @@ import kotlinx.coroutines.runBlocking
 
 
 @Database(
-    entities = [Movie::class, MovieImage::class],
-    version = 9,
+    entities = [Movie::class],
+    version = 10,
     exportSchema = false
 )
 abstract class MovieDB : RoomDatabase() {
@@ -20,20 +20,12 @@ abstract class MovieDB : RoomDatabase() {
         val dao = movieDao()
 
         val initialMovies = getMovies()
-        val initialMovieImages = getMovieImage()
 
         runBlocking(Dispatchers.IO) {
             initialMovies.forEach { movie ->
-                val exists = dao.movieExists(movie.title) > 0
+                val exists = dao.movieExists(movie.orTitle) > 0
                 if (!exists) {
                     dao.addMovie(movie)
-                }
-            }
-
-            initialMovieImages.forEach { movieImage ->
-                val exists = dao.movieImageExists(movieImage.movieId, movieImage.url)
-                if (exists == 0) {
-                    dao.addMovieImage(movieImage)
                 }
             }
         }

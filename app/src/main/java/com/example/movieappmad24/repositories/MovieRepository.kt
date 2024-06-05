@@ -1,8 +1,8 @@
 package com.example.movieappmad24.repositories
 
 import android.util.Log
+import com.example.movieappmad24.data.Movie
 import com.example.movieappmad24.data.MovieDao
-import com.example.movieappmad24.data.MovieWithImages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -11,20 +11,17 @@ import kotlinx.coroutines.withContext
 
 class MovieRepository(private val movieDao: MovieDao) {
 
-    suspend fun getAllMoviesWithImages(): Flow<List<MovieWithImages>> {
+    suspend fun getAllMovies(): Flow<List<Movie>> {
         return flow {
-            val moviesWithImages = movieDao.getAllMoviesWithImages()
+            val moviesWithImages = movieDao.getAllMovies()
             Log.d("MovieRepository", "Fetched ${moviesWithImages.size} movies with images")
             emit(moviesWithImages)
         }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun update(movieWithImages: MovieWithImages) {
+    suspend fun update(movie: Movie) {
         withContext(Dispatchers.IO) {
-            movieDao.updateMovie(movieWithImages.movie)
-            movieWithImages.images.forEach { movieImage ->
-                movieDao.updateMovieImage(movieImage)
-            }
+            movieDao.updateMovie(movie)
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.movieappmad24.di
 
 import android.content.Context
+import com.example.movieappmad24.AddMovieViewModelFactory
 import com.example.movieappmad24.DetailScreenViewModelFactory
 import com.example.movieappmad24.HomeScreenViewModelFactory
 import com.example.movieappmad24.WatchlistScreenViewModelFactory
@@ -18,6 +19,11 @@ object InjectorUtils {
     fun provideHomeScreenViewModelFactory(context: Context): HomeScreenViewModelFactory {
         val repository = getMovieRepository(context)
         return HomeScreenViewModelFactory(repository)
+    }
+
+    fun provideAddMovieViewModelFactory(context: Context):AddMovieViewModelFactory {
+        val repository = getMovieRepository(context)
+        return AddMovieViewModelFactory(repository)
     }
 
     fun provideWatchlistScreenViewModelFactory(context: Context): WatchlistScreenViewModelFactory {

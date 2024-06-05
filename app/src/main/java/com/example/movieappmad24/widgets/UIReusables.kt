@@ -1,22 +1,16 @@
 package com.example.movieappmad24.widgets
 
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -29,12 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import coil.compose.rememberAsyncImagePainter
-import com.example.movieappmad24.data.MovieWithImages
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,12 +49,16 @@ fun SimpleBottomAppBar(navController: NavController) {
 
     val items = listOf(
         BottomNavigationItem(
+            title = "watchlist",
+            icon = Icons.Filled.Favorite
+        ),
+        BottomNavigationItem(
             title = "home",
             icon = Icons.Filled.Home
         ),
         BottomNavigationItem(
-            title = "watchlist",
-            icon = Icons.Filled.Star
+            title = "addMovie",
+            icon = Icons.Filled.AddCircle
         )
     )
 
@@ -106,34 +101,6 @@ fun SimpleBottomAppBar(navController: NavController) {
                     }
                 }
             )
-        }
-    }
-}
-
-@Composable
-fun CoilImage(
-    movieWithImages: MovieWithImages
-) {
-    val images = movieWithImages.images.map { it.url }
-
-    LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp)
-    ) {
-        items(images.size) { index ->
-            Card(
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .size(300.dp)
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(images[index]),
-                    contentDescription = "Image $index",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxHeight()
-                )
-            }
         }
     }
 }

@@ -22,9 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.movieappmad24.di.InjectorUtils
 import com.example.movieappmad24.models.DetailScreenViewModel
-import com.example.movieappmad24.widgets.CoilImage
 import com.example.movieappmad24.widgets.SingleVisibleObjectGroup
-import com.example.movieappmad24.widgets.Trailer
+
 
 @Composable
 fun DetailScreen(
@@ -37,7 +36,7 @@ fun DetailScreen(
         factory = InjectorUtils.provideDetailScreenViewModelFactory(context, movieId)
     )
 
-    val movieWithImages by detailScreenViewModel.movies.collectAsState()
+    val movie by detailScreenViewModel.movies.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -45,23 +44,19 @@ fun DetailScreen(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back Icon")
             }
-            SimpleTopAppBar(title = movieWithImages?.movie?.title ?: "Movie Details")
+            SimpleTopAppBar(title = movie?.orTitle ?: "Movie Details")
         },
         bottomBar = {
             SimpleBottomAppBar(navController = navController)
         }
     ) { innerPadding ->
-        movieWithImages?.let { movie ->
+        movie?.let { movie ->
             LazyColumn(modifier = Modifier.padding(innerPadding)) {
                 item {
                     SingleVisibleObjectGroup(
-                        movieWithImages = movie,
+                        movie = movie,
                         onFavoriteClick = { detailScreenViewModel.toggleFavorite() }
                     )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Trailer(movieWithImages = movie)
-                    Spacer(modifier = Modifier.height(5.dp))
-                    CoilImage(movieWithImages = movie)
                     Spacer(modifier = Modifier.height(5.dp))
                 }
             }
