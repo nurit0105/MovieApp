@@ -23,18 +23,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.movieappmad24.data.Movie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SimpleTopAppBar(title: String) {
+fun SimpleTopAppBar(
+    title: String
+) {
     TopAppBar(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 125.dp),
-        title = { Text(text = title) })
+        modifier = Modifier.fillMaxWidth(),
+        title = {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = title, textAlign = TextAlign.Center)
+            }
+        },
+    )
 }
 
 data class BottomNavigationItem(
@@ -49,7 +59,7 @@ fun SimpleBottomAppBar(navController: NavController) {
 
     val items = listOf(
         BottomNavigationItem(
-            title = "watchlist",
+            title = "favorites",
             icon = Icons.Filled.Favorite
         ),
         BottomNavigationItem(

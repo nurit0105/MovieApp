@@ -13,7 +13,7 @@ import com.example.movieappmad24.screen.WatchlistScreen
 sealed class NavigationHandling(val route: String) {
     object Home : NavigationHandling("home")
     object Detail : NavigationHandling("detail/{movieId}")
-    object Watchlist : NavigationHandling("watchlist")
+    object Watchlist : NavigationHandling("favorites")
     object AddMovie: NavigationHandling("addMovie")
 }
 

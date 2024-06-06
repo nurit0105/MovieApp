@@ -25,6 +25,12 @@ class MovieRepository(private val movieDao: MovieDao) {
         }
     }
 
+    suspend fun addMovie(movie: Movie) {
+        withContext(Dispatchers.IO) {
+            movieDao.addMovie(movie)
+        }
+    }
+
     companion object {
         @Volatile
         private var instance: MovieRepository? = null

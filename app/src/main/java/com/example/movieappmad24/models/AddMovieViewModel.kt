@@ -20,4 +20,10 @@ class AddMovieViewModel(private val repository: MovieRepository) : ViewModel() {
             }
         }
     }
+
+    fun addMovie(movie: Movie) {
+        viewModelScope.launch {
+            repository.addMovie(movie)
+        }
+    }
 }
