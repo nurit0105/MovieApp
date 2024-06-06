@@ -1,9 +1,12 @@
 package com.example.movieappmad24.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.util.TableInfo
 
-@Entity(tableName = "movie")
+@Entity(tableName = "movie", indices = [Index(value = ["orTitle"], unique = true)])
 data class Movie(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
@@ -29,20 +32,5 @@ data class Movie(
 
 fun getMovies(): List<Movie> {
     return listOf(
-        Movie(
-            orTitle = "Test",
-            dtTitle = "Test",
-            lengthMin = 50,
-            year = 2024,
-            country = "",
-            production = "Testion",
-            director = "Ms. Test",
-            book = "The Test of Test",
-            camera = "TestCam",
-            music = "TestMic",
-            actor1 = "TE",
-            actor2 = "S",
-            actor3 = "T"
-        )
     )
 }
