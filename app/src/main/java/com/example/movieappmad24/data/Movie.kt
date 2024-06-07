@@ -23,6 +23,7 @@ data class Movie(
     var actor1: String?,
     var actor2: String?,
     var actor3: String?,
+    var imageUri: String? = null,
     var isFavorite: Boolean = false
 ) {
     override fun equals(other: Any?): Boolean {

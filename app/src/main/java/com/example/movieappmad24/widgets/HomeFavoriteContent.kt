@@ -2,6 +2,7 @@ package com.example.movieappmad24.widgets
 
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,14 +15,22 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import com.example.movieappmad24.R
 import com.example.movieappmad24.data.Movie
 import com.example.movieappmad24.models.DetailScreenViewModel
 import com.example.movieappmad24.models.HomeScreenViewModel
 import com.example.movieappmad24.models.WatchlistScreenViewModel
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 
 @Composable
 fun ListOfVisibleObjectGroups(
@@ -162,6 +171,8 @@ fun FavoriteIcon(
 
 @Composable
 fun MovieDetails(modifier: Modifier, movie: Movie) {
+    val painter = rememberAsyncImagePainter(model = movie.imageUri)
+
     Column(modifier = modifier.padding(horizontal = 20.dp, vertical = 3.dp)) {
         Text(text = "Director: ${movie.director}")
         Text(text = "Original Title: ${movie.orTitle}")
@@ -177,5 +188,11 @@ fun MovieDetails(modifier: Modifier, movie: Movie) {
         Text(text = "Actor/Actress: ${movie.actor1}")
         Text(text = "Actor/Actress: ${movie.actor2}")
         Text(text = "Actor/Actress: ${movie.actor3}")
+
+        Image(
+            painter = painter,
+            contentDescription = null,
+            modifier = Modifier.padding(vertical = 8.dp) // Adjust padding as needed
+        )
     }
 }

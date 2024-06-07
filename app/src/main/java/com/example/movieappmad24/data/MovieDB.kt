@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 
 @Database(
     entities = [Movie::class],
-    version = 13,
+    version = 15,
     exportSchema = false
 )
 abstract class MovieDB : RoomDatabase() {

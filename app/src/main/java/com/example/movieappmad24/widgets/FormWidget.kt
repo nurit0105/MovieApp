@@ -1,49 +1,36 @@
 package com.example.movieappmad24.widgets
 
+import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,18 +39,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.movieappmad24.data.Movie
 import com.example.movieappmad24.models.AddMovieViewModel
-import com.example.movieappmad24.models.DetailScreenViewModel
-import com.example.movieappmad24.models.HomeScreenViewModel
-import com.example.movieappmad24.models.WatchlistScreenViewModel
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 
 @Composable
 fun NewMovie(
@@ -96,6 +80,11 @@ fun NewMovie(
                 filledProduction.isNotBlank() &&
                 filledDirector.isNotBlank()
     }
+
+    var showCamera by remember { mutableStateOf(false) }
+    var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var filledImageUri by remember { mutableStateOf<String?>(null) }
+
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -417,6 +406,42 @@ fun NewMovie(
                 Spacer(modifier = Modifier.padding(3.dp))
             }
             item {
+                if (showCamera) {
+                    CameraXPreview(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        onImageCaptured = { uri ->
+                            capturedImageUri = uri
+                            filledImageUri = uri.toString() // Update the URI in the Movie entity
+                            showCamera = false
+                        },
+                        onError = { exception ->
+                            Log.e("CameraX", "Camera error", exception)
+                        }
+                    )
+                } else {
+                    Button(
+                        onClick = { showCamera = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(text = "Open Camera")
+                    }
+                    capturedImageUri?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = it),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                    }
+                }
+            }
+
+            item {
                 var submitted by remember { mutableStateOf(false) }
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
@@ -436,7 +461,8 @@ fun NewMovie(
                             music = filledMusic,
                             actor1 = filledActor1,
                             actor2 = filledActor2,
-                            actor3 = filledActor3
+                            actor3 = filledActor3,
+                            imageUri = filledImageUri
                         )
                         viewModel.addMovie(newMovie)
                         submitted = true
@@ -444,11 +470,13 @@ fun NewMovie(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (showError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
                     Text(text = "Submit")
                 }
-                if(submitted) {
+                if (submitted) {
                     Text(text = "Movie Added")
                 }
             }
